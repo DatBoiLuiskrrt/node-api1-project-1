@@ -20,4 +20,17 @@ server.get("/api/users", (req, res) => {
     });
 });
 
+server.get("/api/users/:id", (req, res) => {
+  Users.findById(req.params.id)
+    .then((user) => {
+      res.json(user);
+    })
+    .catch((err) => {
+      res.status(500).json({
+        message: "Could not load user",
+        error: err.message,
+      });
+    });
+});
+
 module.exports = server;
