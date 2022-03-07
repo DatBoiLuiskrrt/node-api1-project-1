@@ -14,7 +14,7 @@ server.get("/api/users", (req, res) => {
     })
     .catch((err) => {
       res.status(500).json({
-        message: "something bad happened.",
+        message: "Could not load all users",
         error: err.message,
       });
     });
@@ -27,10 +27,29 @@ server.get("/api/users/:id", (req, res) => {
     })
     .catch((err) => {
       res.status(500).json({
-        message: "Could not load user",
+        message: "Could not load user with the specified id",
         error: err.message,
       });
     });
+});
+
+server.post("/api/users", (req, res) => {
+  if (!req.body.name || !req.body.bio) {
+    res.status(400).json({
+      message: "Name and Bio are require my friend.",
+    });
+  } else {
+    Users.insert(req.body)
+      .then((newUser) => {
+        res.status(201).json(newUser);
+      })
+      .catch((err) => {
+        res.status(500).json({
+          message: "error posting new user",
+          error: err.message,
+        });
+      });
+  }
 });
 
 module.exports = server;
