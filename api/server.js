@@ -15,7 +15,7 @@ server.get("/api/users", (req, res) => {
     })
     .catch((err) => {
       res.status(500).json({
-        message: "Could not load all users",
+        message: "The users information could not be retrieved",
         error: err.message,
       });
     });
@@ -24,7 +24,13 @@ server.get("/api/users", (req, res) => {
 server.get("/api/users/:id", (req, res) => {
   Users.findById(req.params.id)
     .then((user) => {
-      res.json(user);
+      if (!user) {
+        res.status(404).json({
+          message: "The user with the specified ID does not exist",
+        });
+      } else {
+        res.json(user);
+      }
     })
     .catch((err) => {
       res.status(500).json({
@@ -37,7 +43,7 @@ server.get("/api/users/:id", (req, res) => {
 server.post("/api/users", (req, res) => {
   if (!req.body.name || !req.body.bio) {
     res.status(400).json({
-      message: "Name and Bio are require my friend.",
+      message: "Please provide name and bio for the user",
     });
   } else {
     Users.insert(req.body)
@@ -46,63 +52,55 @@ server.post("/api/users", (req, res) => {
       })
       .catch((err) => {
         res.status(500).json({
-          message: "error posting new user",
+          message: "There was an error while saving the user to the database",
           error: err.message,
         });
       });
   }
 });
 
-server.put("/api/users", async (req, res) => {
-  const { id } = req.params;
-  const { body } = req;
-  //   Users.update(id, body)
-  //   .then(updated){
-  //       if(!updated){
-  //           res.status(404).json({
-  //         message: `User by id ${id} does not exist`,
+server.put("/api/users/:id", (req, res) => {
+  const user = req.body;
 
-  //           })
-  //       }else {
-  //         res.json(updated);
-  //       }catch (err) {
-  //         res.status(500).json({
-  //           message: "error updating existing dog",
-  //           error: err.message,
-  //         });
-  //       }
-  //   }
-  try {
-    const updated = await Users.update(id, body);
-    if (!updated) {
-      res.status(404).json({
-        message: `User by id ${id} does not exist`,
-      });
-    } else {
-      res.json(updated);
-    }
-  } catch (err) {
-    res.status(500).json({
-      message: "error updating existing dog",
-      error: err.message,
-    });
+  if (!req.body.name || !req.body.bio) {
+    res
+      .status(400)
+      .json({ message: "Please provide name and bio for the user" });
+    return;
   }
+
+  Users.update(req.params.id, user)
+    .then((user) => {
+      if (user == null) {
+        res
+          .status(404)
+          .json({ message: "The user with the specified ID does not exist" });
+      } else {
+        res.status(200).json(user);
+      }
+    })
+    .catch((error) => {
+      res
+        .status(500)
+        .json({ message: "The user information could not be modified" });
+    });
 });
 
-server.delete("/api/users/:id", async (req, res) => {
+server.delete("/api/users/:id", (req, res) => {
   const { id } = req.params;
   Users.remove(id)
     .then((deletedUser) => {
       if (!deletedUser) {
         res.status(404).json({
-          message: `User by id ${id} does not exist`,
-          error: err.message,
+          message: "The user with the specified ID does not exist",
         });
+      } else {
+        res.json(deletedUser);
       }
     })
     .catch((err) => {
       res.status(500).json({
-        message: "Could not delete",
+        message: "The user could not be removed",
         error: err.message,
       });
     });
