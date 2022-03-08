@@ -56,6 +56,22 @@ server.post("/api/users", (req, res) => {
 server.put("/api/users", async (req, res) => {
   const { id } = req.params;
   const { body } = req;
+  //   Users.update(id, body)
+  //   .then(updated){
+  //       if(!updated){
+  //           res.status(404).json({
+  //         message: `User by id ${id} does not exist`,
+
+  //           })
+  //       }else {
+  //         res.json(updated);
+  //       }catch (err) {
+  //         res.status(500).json({
+  //           message: "error updating existing dog",
+  //           error: err.message,
+  //         });
+  //       }
+  //   }
   try {
     const updated = await Users.update(id, body);
     if (!updated) {
@@ -71,6 +87,25 @@ server.put("/api/users", async (req, res) => {
       error: err.message,
     });
   }
+});
+
+server.delete("/api/users/:id", async (req, res) => {
+  const { id } = req.params;
+  Users.remove(id)
+    .then((deletedUser) => {
+      if (!deletedUser) {
+        res.status(404).json({
+          message: `User by id ${id} does not exist`,
+          error: err.message,
+        });
+      }
+    })
+    .catch((err) => {
+      res.status(500).json({
+        message: "Could not delete",
+        error: err.message,
+      });
+    });
 });
 
 module.exports = server;
